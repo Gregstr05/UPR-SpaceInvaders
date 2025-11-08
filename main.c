@@ -20,9 +20,17 @@ int main()
 		SDL_PollEvent(&e);
 		if (e.type == SDL_QUIT)
 			quit = SDL_TRUE;
+		if (e.key.keysym.sym == SDLK_ESCAPE)
+		{
+			quit = SDL_TRUE;
+		}
 
 		SDL_RenderPresent(renderer);
 
+		SDL_Rect test = {0,0, 20,20};
+		SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
+		//SDL_RenderDrawRect(renderer, &test);
+		SDL_RenderFillRect(renderer, &test);
 
 	}
 

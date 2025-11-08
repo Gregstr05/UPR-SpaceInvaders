@@ -7,11 +7,11 @@ add_executable(${PROJECT_NAME}
 )
 
 find_package(SDL2 REQUIRED)
-find_package(SDL_image REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 target_link_libraries(
 		SpaceInvaders
 		PRIVATE
 		SDL2
-		SDL_image
+		SDL2_image
 )

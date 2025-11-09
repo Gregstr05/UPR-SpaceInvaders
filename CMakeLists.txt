@@ -5,7 +5,8 @@ project(SpaceInvaders)
 add_executable(${PROJECT_NAME} 
 	main.c
 	SpaceInvaders.c
-	SpaceInvaders.h
+	Enemy.c
+	Player.c
 )
 
 find_package(SDL2 REQUIRED)

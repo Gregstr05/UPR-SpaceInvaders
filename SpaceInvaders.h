@@ -5,6 +5,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include "Enemy.h"
+#include "Player.h"
+
 // Number of enemies (Lines * Columns + 1 for mothership)
 #define NUM_ENEMIES (5*11+1)
 
@@ -13,26 +16,6 @@ typedef struct {
     SDL_Renderer *renderer;
     SDL_bool bShouldClose;
 } GameState;
-
-typedef struct {
-    int posX;
-    int posY;
-    int Lifes;
-} Player;
-
-typedef enum {
-    Small,
-    Medium,
-    Large,
-    MotherShip
-} EnemyType;
-
-typedef struct {
-    EnemyType type;
-    int poxX;
-    int poxY;
-    SDL_bool bAlive;
-} Enemy;
 
 typedef struct {
     Player *player;

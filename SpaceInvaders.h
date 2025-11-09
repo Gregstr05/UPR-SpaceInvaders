@@ -1,6 +1,3 @@
-//
-// Created by gregstr on 09.11.25.
-//
 
 #ifndef SPACEINVADERS_SPACEINVADERS_H
 #define SPACEINVADERS_SPACEINVADERS_H
@@ -11,9 +8,11 @@
 typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
+    SDL_bool bShouldClose;
 }GameState;
 
-void Init();
+void Init(GameState *state);
+void Destroy(GameState *state);
 
 void Update(double deltaTime, GameState *state);
 void Render(GameState *state);

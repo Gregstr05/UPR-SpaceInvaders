@@ -21,4 +21,12 @@ typedef struct {
     SDL_bool bAlive;
 } Enemy;
 
+typedef struct {
+    SDL_Surface *small;
+    SDL_Surface *medium;
+    SDL_Surface *large;
+} EnemyTextures;
+
+int LoadEnemyTextures(EnemyTextures **enemies);
+
 #endif //SPACEINVADERS_ENEMY_H

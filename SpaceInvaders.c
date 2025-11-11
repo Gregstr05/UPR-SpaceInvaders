@@ -39,7 +39,7 @@ void Update(double deltaTime, GameState *state)
 
 }
 
-void Render(GameState *state)
+void Render(GameState *state, GameTextures *textures)
 {
 
 }

@@ -10,6 +10,9 @@ int main()
 	GameState gameState;
 	Init(&gameState);
 
+	GameTextures textures;
+	LoadEnemyTextures(&textures.enemies);
+
 	float posX = 0, posY = 0;
 
 	unsigned long lastTime = SDL_GetPerformanceCounter();
@@ -34,7 +37,7 @@ int main()
 		SDL_SetRenderDrawColor(gameState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(gameState.renderer);
 
-		Render(&gameState);
+		Render(&gameState, &textures);
 
 		SDL_RenderPresent(gameState.renderer);
 

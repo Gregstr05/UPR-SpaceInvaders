@@ -22,6 +22,10 @@ typedef struct {
     Enemy Enemies[NUM_ENEMIES];
 } GameData;
 
+typedef struct {
+    EnemyTextures *enemies;
+} GameTextures;
+
 /**
  * Initializes SDL and stores important pointers in the GameState reference
  * @param state GameState reference
@@ -45,6 +49,6 @@ void Update(double deltaTime, GameState *state);
  * Gets called every frame after Update() and renders based on game data
  * @param state GameState reference
  */
-void Render(GameState *state);
+void Render(GameState *state, GameTextures *textures);
 
 #endif //SPACEINVADERS_SPACEINVADERS_H

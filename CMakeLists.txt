@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 3.29)
 
 project(SpaceInvaders)
 
-add_executable(${PROJECT_NAME} 
-	main.c
-	SpaceInvaders.c
-	Enemy.c
-	Player.c
+add_executable(${PROJECT_NAME})
+target_sources(${PROJECT_NAME}
+	PUBLIC
+		SpaceInvaders.h
+		Enemy.h
+		Player.h
+	PRIVATE
+		main.c
+		SpaceInvaders.c
+		Enemy.c
+		Player.c
 )
 
 find_package(SDL2 REQUIRED)
@@ -17,4 +23,12 @@ target_link_libraries(
 		PRIVATE
 		SDL2
 		SDL2_image
+)
+
+file(GLOB IMAGES *.png)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Textures)
+add_custom_command(
+		TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${IMAGES} ${CMAKE_BINARY_DIR}/Textures
 )

@@ -34,7 +34,7 @@ int main()
 
 		Update(deltaTime, &gameState);
 
-		SDL_SetRenderDrawColor(gameState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(gameState.renderer, 0, 128, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(gameState.renderer);
 
 		Render(&gameState, &textures);

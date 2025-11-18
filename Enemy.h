@@ -22,11 +22,12 @@ typedef struct {
 } Enemy;
 
 typedef struct {
-    SDL_Surface *small;
-    SDL_Surface *medium;
-    SDL_Surface *large;
+    SDL_Texture *small;
+    SDL_Texture *medium;
+    SDL_Texture *large;
 } EnemyTextures;
 
-int LoadEnemyTextures(EnemyTextures **enemies);
+int LoadEnemyTextures(SDL_Renderer *renderer, EnemyTextures **enemies);
+void DestroyEnemyTextures(SDL_Renderer *renderer, EnemyTextures **enemies);
 
 #endif //SPACEINVADERS_ENEMY_H

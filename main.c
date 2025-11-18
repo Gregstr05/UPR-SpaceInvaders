@@ -11,7 +11,7 @@ int main()
 	Init(&gameState);
 
 	GameTextures textures;
-	LoadEnemyTextures(&textures.enemies);
+	LoadEnemyTextures(gameState.renderer, &textures.enemies);
 
 	float posX = 0, posY = 0;
 
@@ -43,6 +43,7 @@ int main()
 
 	}
 
+	DestroyEnemyTextures(gameState.renderer, &textures.enemies);
 	Destroy(&gameState);
 
 	return 0;

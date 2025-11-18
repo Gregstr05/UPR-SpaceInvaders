@@ -43,8 +43,6 @@ void Render(GameState *state, GameTextures *textures)
 {
     SDL_Rect mediumEnemySrc = {0,0,12,12};
     SDL_Rect mediumEnemy = {0, 0, 48, 48};
-    // SDL_CreateTexture(state->renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, mediumnemy.w, mediumnemy.h);
-    SDL_Texture *mediumEnemyTexture = SDL_CreateTextureFromSurface(state->renderer, textures->enemies->medium);
-    SDL_SetTextureScaleMode(mediumEnemyTexture, SDL_ScaleModeNearest);
-    SDL_RenderCopy(state->renderer, mediumEnemyTexture, &mediumEnemySrc, &mediumEnemy);
+    SDL_SetTextureScaleMode(textures->enemies->medium, SDL_ScaleModeNearest);
+    SDL_RenderCopy(state->renderer, textures->enemies->medium, &mediumEnemySrc, &mediumEnemy);
 }

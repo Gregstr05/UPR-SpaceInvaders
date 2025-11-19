@@ -26,6 +26,9 @@ target_link_libraries(
 		SDL2_image
 )
 
+target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+
 file(GLOB IMAGES *.png)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Textures)
 add_custom_command(

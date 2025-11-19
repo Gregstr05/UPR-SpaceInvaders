@@ -14,6 +14,7 @@ int main()
 	LoadEnemyTextures(gameState.renderer, &textures.enemies);
 
 	GameData gameData;
+	InitGameData(&gameData);
 
 	float posX = 0, posY = 0;
 
@@ -24,7 +25,7 @@ int main()
 		currentTime = SDL_GetPerformanceCounter();;
 		double deltaTime = (double)((currentTime - lastTime) / (double)SDL_GetPerformanceFrequency());
 		lastTime = currentTime;
-
+/*
 		SDL_Event e;
 		SDL_PollEvent(&e);
 		if (e.type == SDL_QUIT)
@@ -32,7 +33,7 @@ int main()
 		if (e.key.keysym.sym == SDLK_ESCAPE)
 		{
 			gameState.bShouldClose = SDL_TRUE;
-		}
+		}*/
 
 		Update(deltaTime, &gameState, &gameData);
 

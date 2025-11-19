@@ -11,6 +11,9 @@
 // Number of enemies (Lines * Columns + 1 for mothership)
 #define NUM_ENEMIES (5*11+1)
 
+#define SCREEN_WIDTH 480
+#define SCREEN_HEIGHT 640
+
 typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -23,7 +26,7 @@ typedef struct {
 } GameData;
 
 typedef struct {
-    EnemyTextures *enemies;
+    EnemyTextures enemies;
 } GameTextures;
 
 /**
@@ -31,6 +34,8 @@ typedef struct {
  * @param state GameState reference
  */
 void Init(GameState *state);
+
+void InitGameData(GameData *data);
 
 /**
  * Cleans up SDL

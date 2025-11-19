@@ -34,15 +34,25 @@ void Destroy(GameState *state)
     SDL_Quit();
 }
 
-void Update(double deltaTime, GameState *state)
+void Update(double deltaTime, GameState *state, GameData *gameData)
 {
-
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+            case SDL_QUIT: state->bShouldClose = SDL_TRUE; break;
+            case SDL_KEYDOWN: switch (event.key.keysym.sym)
+            {
+                case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
+            }
+        }
+    }
 }
 
-void Render(GameState *state, GameTextures *textures)
+void Render(GameState *state, GameTextures *textures, GameData *gameData)
 {
     SDL_Rect mediumEnemySrc = {0,0,12,12};
     SDL_Rect mediumEnemy = {0, 0, 48, 48};
-    SDL_SetTextureScaleMode(textures->enemies->medium, SDL_ScaleModeNearest);
     SDL_RenderCopy(state->renderer, textures->enemies->medium, &mediumEnemySrc, &mediumEnemy);
 }

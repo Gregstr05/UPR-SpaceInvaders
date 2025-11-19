@@ -8,6 +8,7 @@ target_sources(${PROJECT_NAME}
 		SpaceInvaders.h
 		Enemy.h
 		Player.h
+		Helpers.h
 	PRIVATE
 		main.c
 		SpaceInvaders.c

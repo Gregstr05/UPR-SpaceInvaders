@@ -2,11 +2,13 @@
 
 #include <SDL2/SDL_image.h>
 
+#include "Helpers.h"
+
 int LoadEnemyTextures(SDL_Renderer *renderer, EnemyTextures **enemies)
 {
-    (*enemies)->large = IMG_LoadTexture(renderer, "Textures/Large.png");
-    (*enemies)->medium = IMG_LoadTexture(renderer, "Textures/Medium.png");
-    (*enemies)->small = IMG_LoadTexture(renderer, "Textures/Small.png");
+    LOAD_TEXTURE((*enemies)->large, "Textures/Large.png", renderer);
+    LOAD_TEXTURE((*enemies)->medium, "Textures/Medium.png", renderer);
+    LOAD_TEXTURE((*enemies)->small, "Textures/Small.png", renderer);
     return 0;
 }
 

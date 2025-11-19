@@ -43,12 +43,12 @@ void Destroy(GameState *state);
  * @param deltaTime Time difference between this and previous frame
  * @param state GameState reference
  */
-void Update(double deltaTime, GameState *state);
+void Update(double deltaTime, GameState *state, GameData *gameData);
 
 /**
  * Gets called every frame after Update() and renders based on game data
  * @param state GameState reference
  */
-void Render(GameState *state, GameTextures *textures);
+void Render(GameState *state, GameTextures *textures, GameData *gameData);
 
 #endif //SPACEINVADERS_SPACEINVADERS_H

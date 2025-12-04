@@ -5,13 +5,11 @@
 
 int main()
 {
-	printf("Goodbye, world!\n");
-
 	GameState gameState;
 	Init(&gameState);
 
 	GameTextures textures;
-	LoadEnemyTextures(gameState.renderer, &textures.enemies);
+	LoadTextures(gameState.renderer, &textures);
 
 	GameData gameData;
 	InitGameData(&gameData);
@@ -25,15 +23,6 @@ int main()
 		currentTime = SDL_GetPerformanceCounter();;
 		double deltaTime = (double)((currentTime - lastTime) / (double)SDL_GetPerformanceFrequency());
 		lastTime = currentTime;
-/*
-		SDL_Event e;
-		SDL_PollEvent(&e);
-		if (e.type == SDL_QUIT)
-			gameState.bShouldClose = SDL_TRUE;
-		if (e.key.keysym.sym == SDLK_ESCAPE)
-		{
-			gameState.bShouldClose = SDL_TRUE;
-		}*/
 
 		Update(deltaTime, &gameState, &gameData);
 
@@ -43,10 +32,9 @@ int main()
 		Render(&gameState, &textures, &gameData);
 
 		SDL_RenderPresent(gameState.renderer);
-
 	}
 
-	DestroyEnemyTextures(gameState.renderer, &textures.enemies);
+	DestroyTextures(&textures);
 	Destroy(&gameState);
 
 	return 0;

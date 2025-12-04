@@ -21,12 +21,13 @@ typedef struct {
 } GameState;
 
 typedef struct {
-    Player *player;
-    Enemy Enemies[NUM_ENEMIES];
+    Player player;
+    Enemy enemies[NUM_ENEMIES];
 } GameData;
 
 typedef struct {
     EnemyTextures enemies;
+    PlayerTextures player;
 } GameTextures;
 
 /**
@@ -36,6 +37,9 @@ typedef struct {
 void Init(GameState *state);
 
 void InitGameData(GameData *data);
+
+void LoadTextures(SDL_Renderer *renderer, GameTextures *textures);
+void DestroyTextures(GameTextures *textures);
 
 /**
  * Cleans up SDL

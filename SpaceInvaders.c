@@ -31,8 +31,21 @@ void InitGameData(GameData *data)
 {
     for (int i = 0; i < NUM_ENEMIES; i++)
     {
-        InitEnemy(&data->Enemies[i], Large, (i+1)*(SCREEN_WIDTH/(8)), (i/8+1)*(SCREEN_HEIGHT/(11*12)));
+        InitEnemy(&data->enemies[i], Large, (i+1)*(SCREEN_WIDTH/(8)), (i/8+1)*(SCREEN_HEIGHT/(11*12)));
     }
+    InitPlayer(&data->player);
+}
+
+void LoadTextures(SDL_Renderer *renderer, GameTextures *textures)
+{
+    LoadEnemyTextures(renderer, &textures->enemies);
+    LoadPlayerTextures(renderer, &textures->player);
+}
+
+void DestroyTextures(GameTextures *textures)
+{
+    DestroyEnemyTextures(&textures->enemies);
+    DestroyPlayerTextures(&textures->player);
 }
 
 void Destroy(GameState *state)
@@ -52,6 +65,8 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         case SDL_KEYDOWN: switch (event.key.keysym.sym)
         {
             case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
+            case SDLK_LEFT: MovePlayer(&gameData->player, -2, 0); break;
+            case SDLK_RIGHT: MovePlayer(&gameData->player, 2, 0); break;
             default: break;
         }
         default: break;
@@ -63,6 +78,8 @@ void Render(GameState *state, GameTextures *textures, GameData *gameData)
 {
     for (int i = 0; i < NUM_ENEMIES; i++)
     {
-        RenderEnemy(&gameData->Enemies[i], &textures->enemies, state->renderer);
+        RenderEnemy(&gameData->enemies[i], &textures->enemies, state->renderer);
     }
+
+    RenderPlayer(&gameData->player, &textures->player, state->renderer);
 }

@@ -16,8 +16,7 @@ typedef enum {
 
 typedef struct {
     EnemyType type;
-    int poxX;
-    int poxY;
+    SDL_Point position;
     SDL_bool bAlive;
 } Enemy;
 
@@ -28,7 +27,7 @@ typedef struct {
 } EnemyTextures;
 
 int LoadEnemyTextures(SDL_Renderer *renderer, EnemyTextures *enemies);
-void DestroyEnemyTextures(SDL_Renderer *renderer, EnemyTextures *enemies);
+void DestroyEnemyTextures(EnemyTextures *enemies);
 
 void InitEnemy(Enemy *enemy, EnemyType type, int posX, int posY);
 

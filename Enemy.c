@@ -13,7 +13,7 @@ int LoadEnemyTextures(SDL_Renderer *renderer, EnemyTextures *enemies)
     return 0;
 }
 
-void DestroyEnemyTextures(SDL_Renderer *renderer, EnemyTextures *enemies)
+void DestroyEnemyTextures(EnemyTextures *enemies)
 {
     SDL_DestroyTexture(enemies->large);
     enemies->large = NULL;
@@ -27,8 +27,8 @@ void InitEnemy(Enemy *enemy, EnemyType type, int posX, int posY)
 {
     enemy->type = type;
     enemy->bAlive = SDL_TRUE;
-    enemy->poxX = posX;
-    enemy->poxY = posY;
+    enemy->position.x = posX;
+    enemy->position.y = posY;
 }
 
 void RenderEnemy(Enemy *enemy, EnemyTextures *textures, SDL_Renderer *renderer)
@@ -36,11 +36,12 @@ void RenderEnemy(Enemy *enemy, EnemyTextures *textures, SDL_Renderer *renderer)
     if (!enemy->bAlive)
         return;
     SDL_Rect src = {0,0,12,12};
-    SDL_Rect dst = {enemy->poxX, enemy->poxY, 48, 48};
+    SDL_Rect dst = {enemy->position.x, enemy->position.y, 48, 48};
     switch (enemy->type)
     {
         case Small: SDL_RenderCopy(renderer, textures->small, &src, &dst); break;
         case Medium: SDL_RenderCopy(renderer, textures->medium, &src, &dst); break;
         case Large: SDL_RenderCopy(renderer, textures->large, &src, &dst); break;
+        default: break;
     }
 }

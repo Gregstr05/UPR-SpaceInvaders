@@ -10,6 +10,7 @@ int LoadEnemyTextures(SDL_Renderer *renderer, EnemyTextures *enemies)
     LOAD_TEXTURE(enemies->large, "Textures/Large.png", renderer);
     LOAD_TEXTURE(enemies->medium, "Textures/Medium.png", renderer);
     LOAD_TEXTURE(enemies->small, "Textures/Small.png", renderer);
+    LOAD_TEXTURE(enemies->projectile, "Textures/EnemyProjectile.png", renderer);
     return 0;
 }
 
@@ -21,6 +22,8 @@ void DestroyEnemyTextures(EnemyTextures *enemies)
     enemies->medium = NULL;
     SDL_DestroyTexture(enemies->small);
     enemies->small = NULL;
+    SDL_DestroyTexture(enemies->projectile);
+    enemies->projectile = NULL;
 }
 
 void InitEnemy(Enemy *enemy, EnemyType type, int posX, int posY)

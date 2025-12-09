@@ -58,18 +58,37 @@ void Destroy(GameState *state)
 void Update(double deltaTime, GameState *state, GameData *gameData)
 {
     SDL_Event event;
-    SDL_PollEvent(&event);
-    switch (event.type)
+    while (SDL_PollEvent(&event))
     {
-        case SDL_QUIT: state->bShouldClose = SDL_TRUE; break;
-        case SDL_KEYDOWN: switch (event.key.keysym.sym)
+        switch (event.type)
         {
-            case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
-            case SDLK_LEFT: MovePlayer(&gameData->player, -2, 0); break;
-            case SDLK_RIGHT: MovePlayer(&gameData->player, 2, 0); break;
+            case SDL_QUIT: state->bShouldClose = SDL_TRUE; break;
+            case SDL_KEYDOWN: switch (event.key.keysym.sym)
+            {
+                case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
+                default: break;
+            }
             default: break;
         }
-        default: break;
+    }
+
+    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+
+    float moveSpeed = 200.0f; // pixels per second
+
+    if (keystate[SDL_SCANCODE_LEFT] || keystate[SDL_SCANCODE_A])
+    {
+        int newX = gameData->player.position.x - (int)(moveSpeed * deltaTime);
+        if (newX < 0) newX = 0;
+        gameData->player.position.x = newX;
+    }
+
+    if (keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D])
+    {
+        int newX = gameData->player.position.x + (int)(moveSpeed * deltaTime);
+        // Clamp to screen bounds (player width is 52 pixels)
+        if (newX > SCREEN_WIDTH - 52) newX = SCREEN_WIDTH - 52;
+        gameData->player.position.x = newX;
     }
 
 }

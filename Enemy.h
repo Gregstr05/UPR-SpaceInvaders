@@ -24,6 +24,8 @@ typedef struct {
     SDL_Texture *small;
     SDL_Texture *medium;
     SDL_Texture *large;
+    SDL_Texture *motherShip;
+    SDL_Texture *projectile;
 } EnemyTextures;
 
 int LoadEnemyTextures(SDL_Renderer *renderer, EnemyTextures *enemies);

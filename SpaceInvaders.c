@@ -10,6 +10,13 @@ void Init(GameState *state)
         exit(1);
     }
 
+    int imgFlags = IMG_INIT_PNG;
+    if (!(IMG_Init(imgFlags) & imgFlags))
+    {
+        printf("SDL_image could not initialize! IMG_Error: %s\n", IMG_GetError());
+        exit(1);
+    }
+
     state->window = SDL_CreateWindow("Space Invaders", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (state->window == NULL)
     {
@@ -73,6 +80,7 @@ void Destroy(GameState *state)
 {
     SDL_DestroyRenderer(state->renderer);
     SDL_DestroyWindow(state->window);
+    IMG_Quit();
     SDL_Quit();
 }
 

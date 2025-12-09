@@ -29,10 +29,31 @@ void Init(GameState *state)
 
 void InitGameData(GameData *data)
 {
-    for (int i = 0; i < NUM_ENEMIES; i++)
+    int totalGridWidth = (11 * 48) + ((11 - 1) * 8);
+    int startX = (SCREEN_WIDTH - totalGridWidth) / 2;
+
+    int currentEnemyIndex = 0;
+    for (int row = 0; row < NUM_ENEMIES/11; row++)
     {
-        InitEnemy(&data->enemies[i], Large, (i+1)*(SCREEN_WIDTH/(8)), (i/8+1)*(SCREEN_HEIGHT/(11*12)));
+        EnemyType type;
+        if (row == 0) {
+            type = Small;
+        } else if (row == 1 || row == 2) {
+            type = Medium;
+        } else { // rows 3 and 4
+            type = Large;
+        }
+
+        for (int col = 0; col < 11; col++)
+        {
+            int posX = startX + (col * (48 + 8));
+            int posY = 80 + (row * (48 + 12));
+
+            InitEnemy(&data->enemies[currentEnemyIndex], type, posX, posY);
+            currentEnemyIndex++;
+        }
     }
+
     InitPlayer(&data->player);
 }
 

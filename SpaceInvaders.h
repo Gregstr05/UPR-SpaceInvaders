@@ -11,8 +11,8 @@
 // Number of enemies (Lines * Columns + 1 for mothership)
 #define NUM_ENEMIES (5*11+1)
 
-#define SCREEN_WIDTH 480
-#define SCREEN_HEIGHT 640
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 
 typedef struct {
     SDL_Window *window;

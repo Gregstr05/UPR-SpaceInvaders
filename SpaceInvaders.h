@@ -24,11 +24,13 @@ typedef struct {
 typedef struct {
     Player player;
     Enemy enemies[NUM_ENEMIES];
+
 } GameData;
 
 typedef struct {
     EnemyTextures enemies;
     PlayerTextures player;
+    ProjectileTextures projectiles;
 } GameTextures;
 
 /**

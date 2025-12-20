@@ -45,6 +45,6 @@ void DestroyPlayerTextures(PlayerTextures *textures)
 void RenderPlayer(Player *player, PlayerTextures *textures, SDL_Renderer *renderer)
 {
     SDL_Rect src = {0,0,13,12};
-    SDL_Rect dst = {player->position.x, player->position.y, 52, 48};
+    SDL_Rect dst = {player->position.x, player->position.y, 26, 24};
     SDL_RenderCopy(renderer, textures->player, &src, &dst);
 }

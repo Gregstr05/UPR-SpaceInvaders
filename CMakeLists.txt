@@ -8,12 +8,14 @@ target_sources(${PROJECT_NAME}
 		SpaceInvaders.h
 		Enemy.h
 		Player.h
+		Projectile.h
 		Helpers.h
 	PRIVATE
 		main.c
 		SpaceInvaders.c
 		Enemy.c
 		Player.c
+		Projectile.c
 )
 
 find_package(SDL2 REQUIRED)

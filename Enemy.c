@@ -39,7 +39,7 @@ void RenderEnemy(Enemy *enemy, EnemyTextures *textures, SDL_Renderer *renderer)
     if (!enemy->bAlive)
         return;
     SDL_Rect src = {0,0,12,12};
-    SDL_Rect dst = {enemy->position.x, enemy->position.y, 48, 48};
+    SDL_Rect dst = {enemy->position.x, enemy->position.y, 24, 24};
     switch (enemy->type)
     {
         case Small: SDL_RenderCopy(renderer, textures->small, &src, &dst); break;

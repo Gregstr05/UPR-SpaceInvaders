@@ -7,6 +7,7 @@
 
 #include "Enemy.h"
 #include "Player.h"
+#include "Projectile.h"
 
 // Number of enemies (Lines * Columns + 1 for mothership)
 #define NUM_ENEMIES (5*11+1)

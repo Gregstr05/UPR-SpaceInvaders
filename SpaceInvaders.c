@@ -36,8 +36,8 @@ void Init(GameState *state)
 
 void InitGameData(GameData *data)
 {
-    int totalGridWidth = (11 * 48) + ((11 - 1) * 8);
-    int startX = (SCREEN_WIDTH - totalGridWidth) / 2;
+    int totalGridWidth = (11 * 24) + ((11 - 1) * 8);
+    int startX = ((SCREEN_WIDTH - totalGridWidth) / 2) - 44;
 
     int currentEnemyIndex = 0;
     for (int row = 0; row < NUM_ENEMIES/11; row++)
@@ -53,8 +53,8 @@ void InitGameData(GameData *data)
 
         for (int col = 0; col < 11; col++)
         {
-            int posX = startX + (col * (48 + 8));
-            int posY = 80 + (row * (48 + 12));
+            int posX = startX + (col * (24 + 20));
+            int posY = 80 + (row * (24 + 8));
 
             InitEnemy(&data->enemies[currentEnemyIndex], type, posX, posY);
             currentEnemyIndex++;

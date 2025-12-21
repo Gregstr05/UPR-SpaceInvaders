@@ -68,12 +68,14 @@ void LoadTextures(SDL_Renderer *renderer, GameTextures *textures)
 {
     LoadEnemyTextures(renderer, &textures->enemies);
     LoadPlayerTextures(renderer, &textures->player);
+    LoadProjectileTextures(renderer, &textures->projectiles);
 }
 
 void DestroyTextures(GameTextures *textures)
 {
     DestroyEnemyTextures(&textures->enemies);
     DestroyPlayerTextures(&textures->player);
+    DestroyProjectileTextures(&textures->projectiles);
 }
 
 void Destroy(GameState *state)
@@ -95,6 +97,7 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
             case SDL_KEYDOWN: switch (event.key.keysym.sym)
             {
                 case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
+                case SDLK_SPACE: Fire(&gameData->player); break;
                 default: break;
             }
             default: break;

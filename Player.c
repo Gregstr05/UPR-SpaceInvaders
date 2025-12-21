@@ -48,3 +48,8 @@ void RenderPlayer(Player *player, PlayerTextures *textures, SDL_Renderer *render
     SDL_Rect dst = {player->position.x, player->position.y, 26, 24};
     SDL_RenderCopy(renderer, textures->player, &src, &dst);
 }
+
+void Fire(Player *player)
+{
+    printf("Fire at: x: %d\n", player->position.x);
+}

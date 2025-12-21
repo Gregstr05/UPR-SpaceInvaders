@@ -17,7 +17,7 @@ typedef struct {
 // Appends an item to the end of the dynamic array implementation
 #define APPEND(vector, data) do {\
     if(vector.count >= vector.capacity) {\
-        if (vector.capacity = 0) vector.capacity = 256\
+        if (vector.capacity == 0) vector.capacity = 8\
         vector.capacity *= 2;\
         if (vector.size == 0) vector.size = sizeof(data);\
         vector.data = realloc(vector.data, vector.capacity*vector.size);\

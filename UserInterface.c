@@ -18,17 +18,24 @@ void RenderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Co
 void RenderUI(SDL_Renderer *renderer, GameData *data, GameTextures *textures)
 {
     SDL_Color white = {255, 255, 255, 255};
-
-    char scoreStr[32];
-    sprintf(scoreStr, "SCORE: %05d", data->score);
-    RenderText(renderer, textures->font, scoreStr, white, 20, 20);
-
-    RenderText(renderer, textures->font, "LIVES: ", white, 20, SCREEN_HEIGHT - 40);
-
-    SDL_Rect src = {0, 0, 13, 12};
-    for (int i = 0; i < data->player.lives; i++)
+    switch (data->phase)
     {
-        SDL_Rect dst = {170 + (i * 35), SCREEN_HEIGHT - 45, 26, 24};
-        SDL_RenderCopy(renderer, textures->player.player, &src, &dst);
+        case PHASE_PLAYING: {
+            char scoreStr[32];
+            sprintf(scoreStr, "SCORE: %05d", data->score);
+            RenderText(renderer, textures->font, scoreStr, white, 20, 20);
+
+            RenderText(renderer, textures->font, "LIVES: ", white, 20, SCREEN_HEIGHT - 40);
+
+            SDL_Rect src = {0, 0, 13, 12};
+            for (int i = 0; i < data->player.lives; i++)
+            {
+                SDL_Rect dst = {170 + (i * 35), SCREEN_HEIGHT - 45, 26, 24};
+                SDL_RenderCopy(renderer, textures->player.player, &src, &dst);
+            }
+        } break;
+        case PHASE_GAME_OVER: {
+            RenderText(renderer, textures->font, data->playerName, white, SCREEN_WIDTH/2-(24*3), SCREEN_HEIGHT/2-12);
+        } break;
     }
 }

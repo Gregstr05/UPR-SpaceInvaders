@@ -13,6 +13,8 @@
 // Number of enemies (Lines * Columns + 1 for mothership)
 #define NUM_ENEMIES (5*11+1)
 
+#define UFO_INDEX NUM_ENEMIES-1
+
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
@@ -33,6 +35,10 @@ typedef struct {
     int score;
     int shots;
 
+    // Should not be accesed anywhere but in game over phase
+    char playerName[7];
+    int nameCharIndex;
+
     GamePhase phase;
 
     Enemy enemies[NUM_ENEMIES];
@@ -50,6 +56,10 @@ typedef struct {
 
     float alienFireTimer;
     float alienFireInterval;
+
+    float motherShipSpawnTimer;
+    float motherShipSpawnInterval;
+    int motherShipDirection;
 } GameData;
 
 typedef struct {
@@ -71,6 +81,8 @@ void SpawnEnemies(GameData *gameData);
 void LoadTextures(SDL_Renderer *renderer, GameTextures *textures);
 void DestroyTextures(GameTextures *textures);
 
+void SaveScore(const char *name, int score);
+
 /**
  * Cleans up SDL
  * @param state GameState reference
@@ -83,6 +95,10 @@ void Destroy(GameState *state);
  * @param state GameState reference
  */
 void Update(double deltaTime, GameState *state, GameData *gameData);
+
+void UpdateGamePlay(double deltaTime, GameData *gameData);
+void UpdateGameOver(double deltaTime, GameState *state, GameData *gameData);
+void UpdateMenu(double deltaTime, GameState *state, GameData *gameData);
 
 /**
  * Gets called every frame after Update() and renders based on game data

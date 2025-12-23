@@ -59,7 +59,7 @@ void SpawnEnemies(GameData *gameData)
             type = Small;
         } else if (row == 1 || row == 2) {
             type = Medium;
-        } else { // rows 3 and 4
+        } else {
             type = Large;
         }
 
@@ -76,7 +76,17 @@ void SpawnEnemies(GameData *gameData)
 
 void InitGameData(GameData *data)
 {
+    data->phase = PHASE_PLAYING;
+
     SpawnEnemies(data);
+
+    // Mothership starts dead
+    data->enemies[NUM_ENEMIES - 1].type = MotherShip;
+    data->enemies[NUM_ENEMIES - 1].bAlive = SDL_FALSE;
+
+    data->motherShipSpawnTimer = 0.0f;
+    data->motherShipSpawnInterval = 15.0f + (float)(rand() % 15);
+    data->motherShipDirection = 1;
 
     data->bPlayerProjectileActive = SDL_FALSE;
 
@@ -91,6 +101,9 @@ void InitGameData(GameData *data)
     InitPlayer(&data->player);
     data->score = 0;
     data->shots = 0;
+    data->nameCharIndex = 0;
+    memset(data->playerName, '_', 6);
+    data->playerName[6] = '\0';
 }
 
 void LoadTextures(SDL_Renderer *renderer, GameTextures *textures)
@@ -107,6 +120,16 @@ void DestroyTextures(GameTextures *textures)
     DestroyPlayerTextures(&textures->player);
     DestroyProjectileTextures(&textures->projectiles);
     TTF_CloseFont(textures->font);
+}
+
+void SaveScore(const char *name, int score)
+{
+    FILE *file = fopen("highscores.txt", "a");
+    if (file == NULL) return;
+
+    fprintf(file, "%s %d\n", name, score);
+    fclose(file);
+    printf("Score saved: %s - %d\n", name, score);
 }
 
 void Destroy(GameState *state)
@@ -126,20 +149,48 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         switch (event.type)
         {
             case SDL_QUIT: state->bShouldClose = SDL_TRUE; break;
-            case SDL_KEYDOWN: switch (event.key.keysym.sym)
+            case SDL_KEYDOWN: SDL_Keycode key = event.key.keysym.sym; switch (key)
             {
                 case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
-                case SDLK_SPACE: if (gameData->bPlayerProjectileActive == SDL_FALSE){
+                case SDLK_SPACE: if (gameData->bPlayerProjectileActive == SDL_FALSE && gameData->phase == PHASE_PLAYING){
                     gameData->bPlayerProjectileActive = SDL_TRUE;
                     InitProjectile(&gameData->playerProjectile, (SDL_Point){gameData->player.position.x+12, gameData->player.position.y+10}, PlayerProjectile);
                     gameData->shots++;
                 }; break;
-                default: break;
+                default:
+                    {
+                        if (key >= SDLK_a && key <= SDLK_z && gameData->nameCharIndex < 6) {
+                            gameData->playerName[gameData->nameCharIndex] = (char)('A' + (key - SDLK_a));
+                            gameData->nameCharIndex++;
+                        }
+
+                        else if (key == SDLK_BACKSPACE && gameData->nameCharIndex > 0) {
+                            gameData->nameCharIndex--;
+                            gameData->playerName[gameData->nameCharIndex] = '_';
+                        }
+
+                        else if (key == SDLK_RETURN && gameData->nameCharIndex > 0) {
+                            for(int i = 0; i < 6; i++) if(gameData->playerName[i] == '_') gameData->playerName[i] = ' ';
+
+                            SaveScore(gameData->playerName, gameData->score);
+                            InitGameData(gameData);
+                        }
+                    } break;
             }
             default: break;
         }
     }
 
+    switch (gameData->phase)
+    {
+        case PHASE_MENU: UpdateMenu(deltaTime, state, gameData); break;
+        case PHASE_PLAYING: UpdateGamePlay(deltaTime, gameData); break;
+        case PHASE_GAME_OVER: UpdateGameOver(deltaTime, state, gameData); break;
+    }
+}
+
+void UpdateGamePlay(double deltaTime, GameData *gameData)
+{
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
     float moveSpeed = 200.0f; // Player movement speed, should move it to better place
@@ -201,6 +252,35 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         gameData->player.lives++;
     }
 
+    if (!gameData->enemies[UFO_INDEX].bAlive)
+    {
+        gameData->motherShipSpawnTimer += (float)deltaTime;
+        if (gameData->motherShipSpawnTimer >= gameData->motherShipSpawnInterval)
+        {
+            gameData->enemies[UFO_INDEX].bAlive = SDL_TRUE;
+            gameData->motherShipDirection = (rand() % 2 == 0) ? 1 : -1;
+
+            gameData->enemies[UFO_INDEX].position.y = 40;
+            if (gameData->motherShipDirection == 1)
+                gameData->enemies[UFO_INDEX].position.x = -32;
+            else
+                gameData->enemies[UFO_INDEX].position.x = SCREEN_WIDTH;
+
+            gameData->motherShipSpawnTimer = 0.0f;
+            gameData->motherShipSpawnInterval = 20.0f + (float)(rand() % 20);
+        }
+    }
+    else
+    {
+        float ufoSpeed = 160.0f;
+        gameData->enemies[UFO_INDEX].position.x += (int)(ufoSpeed * gameData->motherShipDirection * deltaTime);
+
+        if (gameData->enemies[UFO_INDEX].position.x < -40 || gameData->enemies[UFO_INDEX].position.x > SCREEN_WIDTH + 40)
+        {
+            gameData->enemies[UFO_INDEX].bAlive = SDL_FALSE;
+        }
+    }
+
     gameData->alienFireTimer += (float)deltaTime;
     if (gameData->alienFireTimer >= gameData->alienFireInterval)
     {
@@ -224,7 +304,9 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         for (int i = 0; i < NUM_ENEMIES; i++)
         {
             Enemy *e = &gameData->enemies[i];
-            if (e->bAlive && CHECK_COLLISION(gameData->playerProjectile.x, gameData->playerProjectile.y, 16, 24, e->position.x, e->position.y, 24, 24))
+            int hitW = (e->type == MotherShip) ? 32 : 24;
+            int hitH = (e->type == MotherShip) ? 14 : 24;
+            if (e->bAlive && CHECK_COLLISION(gameData->playerProjectile.x, gameData->playerProjectile.y, /*It feels better to have a larger projectile hitbox for player projectiles*/ 8, 16, e->position.x, e->position.y, hitH, hitH))
             {
                 e->bAlive = SDL_FALSE;
                 gameData->bPlayerProjectileActive = SDL_FALSE;
@@ -264,24 +346,40 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
             i--;
         }
     }
+
+    if (gameData->player.lives <= 0) {
+        gameData->phase = PHASE_GAME_OVER;
+    }
+}
+
+void UpdateGameOver(double deltaTime, GameState *state, GameData *gameData)
+{
+
+}
+
+void UpdateMenu(double deltaTime, GameState *state, GameData *gameData)
+{
 }
 
 void Render(GameState *state, GameTextures *textures, GameData *gameData)
 {
-    for (int i = 0; i < NUM_ENEMIES; i++)
+    if (gameData->phase == PHASE_PLAYING)
     {
-        RenderEnemy(&gameData->enemies[i], &textures->enemies, state->renderer);
+        for (int i = 0; i < NUM_ENEMIES; i++)
+        {
+            RenderEnemy(&gameData->enemies[i], &textures->enemies, state->renderer);
+        }
+
+        for (int i = 0; i < gameData->numActiveEnemyProjectiles; i++)
+        {
+            RenderProjectile(&gameData->enemyProjectiles[i], &textures->projectiles, state->renderer);
+        }
+
+        if (gameData->bPlayerProjectileActive)
+            RenderProjectile(&gameData->playerProjectile, &textures->projectiles, state->renderer);
+
+        RenderPlayer(&gameData->player, &textures->player, state->renderer);
     }
-
-    for (int i = 0; i < gameData->numActiveEnemyProjectiles; i++)
-    {
-        RenderProjectile(&gameData->enemyProjectiles[i], &textures->projectiles, state->renderer);
-    }
-
-    if (gameData->bPlayerProjectileActive)
-        RenderProjectile(&gameData->playerProjectile, &textures->projectiles, state->renderer);
-
-    RenderPlayer(&gameData->player, &textures->player, state->renderer);
 
     RenderUI(state->renderer, gameData, textures);
 }

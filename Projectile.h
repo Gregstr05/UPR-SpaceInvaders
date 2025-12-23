@@ -24,7 +24,7 @@ typedef struct {
     SDL_Texture* enemy;
 } ProjectileTextures;
 
-int LoadProjectileTextures(SDL_Renderer *renderer, ProjectileTextures *projectileTextures);
+void LoadProjectileTextures(SDL_Renderer *renderer, ProjectileTextures *projectileTextures);
 void DestroyProjectileTextures(ProjectileTextures *projectileTextures);
 
 void InitProjectile(Projectile *projectile, SDL_Point position, ProjectileType type);

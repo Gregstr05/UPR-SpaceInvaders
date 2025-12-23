@@ -8,7 +8,7 @@
 
 #include "Helpers.h"
 
-int LoadProjectileTextures(SDL_Renderer *renderer, ProjectileTextures *projectileTextures)
+void LoadProjectileTextures(SDL_Renderer *renderer, ProjectileTextures *projectileTextures)
 {
     LOAD_TEXTURE(projectileTextures->enemy, "Textures/EnemyProjectile.png", renderer);
     LOAD_TEXTURE(projectileTextures->player, "Textures/PlayerProjectile.png", renderer);

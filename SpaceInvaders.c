@@ -76,7 +76,8 @@ void SpawnEnemies(GameData *gameData)
 
 void InitGameData(GameData *data)
 {
-    data->phase = PHASE_PLAYING;
+    data->phase = PHASE_MENU;
+    LoadHighScores(data);
 
     SpawnEnemies(data);
 
@@ -130,6 +131,43 @@ void SaveScore(const char *name, int score)
     fprintf(file, "%s %d\n", name, score);
     fclose(file);
     printf("Score saved: %s - %d\n", name, score);
+}
+
+void LoadHighScores(GameData *data)
+{
+    data->numHighScores = 0;
+    for (int i = 0; i < 5; i++) {
+        strcpy(data->highScores[i].name, "---");
+        data->highScores[i].score = 0;
+    }
+
+    FILE *file = fopen("highscores.txt", "r");
+    if (file == NULL) return;
+
+    HighScore current;
+    while (fscanf(file, "%6s %d", current.name, &current.score) == 2)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (current.score > data->highScores[i].score)
+            {
+                // Shift down previous high scores
+                for (int j = 4; j > i; j--)
+                {
+                    data->highScores[j] = data->highScores[j - 1];
+                }
+
+                data->highScores[i] = current;
+
+                if (data->numHighScores < 5)
+                    data->numHighScores++;
+
+                break;
+            }
+        }
+    }
+
+    fclose(file);
 }
 
 void Destroy(GameState *state)
@@ -221,6 +259,11 @@ void UpdateGamePlay(double deltaTime, GameData *gameData)
 
             gameData->bAlive = SDL_TRUE;
 
+            if (gameData->enemies[i].position.y >= 520)
+            {
+                gameData->phase = PHASE_GAME_OVER;
+                break;
+            }
             int nextX = gameData->enemies[i].position.x + (gameData->alienDirection * 15);
             if (gameData->alienDirection == 1 && nextX >= SCREEN_WIDTH - 24) {
                 bShouldFlip = SDL_TRUE;
@@ -359,6 +402,11 @@ void UpdateGameOver(double deltaTime, GameState *state, GameData *gameData)
 
 void UpdateMenu(double deltaTime, GameState *state, GameData *gameData)
 {
+    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+    if (keystate[SDL_SCANCODE_SPACE])
+    {
+        gameData->phase = PHASE_PLAYING;
+    }
 }
 
 void Render(GameState *state, GameTextures *textures, GameData *gameData)

@@ -25,6 +25,11 @@ typedef enum {
 } GamePhase;
 
 typedef struct {
+    char name[7];
+    int score;
+} HighScore;
+
+typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_bool bShouldClose;
@@ -38,6 +43,9 @@ typedef struct {
     // Should not be accesed anywhere but in game over phase
     char playerName[7];
     int nameCharIndex;
+
+    HighScore highScores[5];
+    int numHighScores;
 
     GamePhase phase;
 
@@ -82,6 +90,7 @@ void LoadTextures(SDL_Renderer *renderer, GameTextures *textures);
 void DestroyTextures(GameTextures *textures);
 
 void SaveScore(const char *name, int score);
+void LoadHighScores(GameData *data);
 
 /**
  * Cleans up SDL

@@ -18,6 +18,8 @@ void RenderText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Co
 void RenderUI(SDL_Renderer *renderer, GameData *data, GameTextures *textures)
 {
     SDL_Color white = {255, 255, 255, 255};
+    SDL_Color green = {0, 255, 0, 255};
+
     switch (data->phase)
     {
         case PHASE_PLAYING: {
@@ -36,6 +38,21 @@ void RenderUI(SDL_Renderer *renderer, GameData *data, GameTextures *textures)
         } break;
         case PHASE_GAME_OVER: {
             RenderText(renderer, textures->font, data->playerName, white, SCREEN_WIDTH/2-(24*3), SCREEN_HEIGHT/2-12);
+        } break;
+        case PHASE_MENU: {
+            RenderText(renderer, textures->font, "SPACE INVADERS", green, SCREEN_WIDTH/2 - 155, 50);
+            RenderText(renderer, textures->font, "HIGH SCORES", white, SCREEN_WIDTH/2 - 118, 150);
+
+            for (int i = 0; i < data->numHighScores; i++)
+            {
+                char buffer[32];
+                sprintf(buffer, "%d. %-6s %05d", i + 1, data->highScores[i].name, data->highScores[i].score);
+                RenderText(renderer, textures->font, buffer, white, SCREEN_WIDTH/2 - (7*24), 210 + (i * 40));
+            }
+
+            if ((int)(SDL_GetTicks() / 500) % 2 == 0) {
+                RenderText(renderer, textures->font, "PRESS SPACE TO START", white, SCREEN_WIDTH/2 - 232, 480);
+            }
         } break;
     }
 }

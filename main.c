@@ -14,14 +14,12 @@ int main()
 	GameData gameData;
 	InitGameData(&gameData);
 
-	float posX = 0, posY = 0;
-
 	unsigned long lastTime = SDL_GetPerformanceCounter();
 	unsigned long currentTime = 0;
 
 	while (!gameState.bShouldClose) {
 		currentTime = SDL_GetPerformanceCounter();;
-		double deltaTime = (double)((currentTime - lastTime) / (double)SDL_GetPerformanceFrequency());
+		double deltaTime = (double)(currentTime - lastTime) / (double)SDL_GetPerformanceFrequency();
 		lastTime = currentTime;
 
 		Update(deltaTime, &gameState, &gameData);

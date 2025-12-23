@@ -16,6 +16,12 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
+typedef enum {
+    PHASE_MENU,
+    PHASE_PLAYING,
+    PHASE_GAME_OVER
+} GamePhase;
+
 typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -27,7 +33,10 @@ typedef struct {
     int score;
     int shots;
 
+    GamePhase phase;
+
     Enemy enemies[NUM_ENEMIES];
+    SDL_bool bAlive;
 
     Projectile playerProjectile;
     SDL_bool bPlayerProjectileActive;
@@ -57,6 +66,7 @@ typedef struct {
 void Init(GameState *state);
 
 void InitGameData(GameData *data);
+void SpawnEnemies(GameData *gameData);
 
 void LoadTextures(SDL_Renderer *renderer, GameTextures *textures);
 void DestroyTextures(GameTextures *textures);

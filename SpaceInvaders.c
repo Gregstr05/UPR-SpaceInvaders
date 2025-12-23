@@ -46,7 +46,7 @@ void Init(GameState *state)
     state->bShouldClose = SDL_FALSE;
 }
 
-void InitGameData(GameData *data)
+void SpawnEnemies(GameData *gameData)
 {
     int totalGridWidth = (11 * 24) + ((11 - 1) * 8);
     int startX = ((SCREEN_WIDTH - totalGridWidth) / 2) - 44;
@@ -68,16 +68,21 @@ void InitGameData(GameData *data)
             int posX = startX + (col * (24 + 20));
             int posY = 80 + (row * (24 + 8));
 
-            InitEnemy(&data->enemies[currentEnemyIndex], type, posX, posY);
+            InitEnemy(&gameData->enemies[currentEnemyIndex], type, posX, posY);
             currentEnemyIndex++;
         }
     }
+}
+
+void InitGameData(GameData *data)
+{
+    SpawnEnemies(data);
 
     data->bPlayerProjectileActive = SDL_FALSE;
 
     data->alienDirection = 1;
     data->alienMoveTimer = 0.0f;
-    data->alienMoveInterval = 0.5f;
+    data->alienMoveInterval = 0.8f;
     data->numActiveEnemyProjectiles = 0;
 
     data->alienFireTimer = 0.0f;
@@ -137,7 +142,7 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
 
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
-    float moveSpeed = 200.0f; // pixels per second
+    float moveSpeed = 200.0f; // Player movement speed, should move it to better place
 
     if (keystate[SDL_SCANCODE_LEFT] || keystate[SDL_SCANCODE_A])
     {
@@ -149,32 +154,34 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
     if (keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D])
     {
         int newX = gameData->player.position.x + (int)(moveSpeed * deltaTime);
-        // Clamp to screen bounds (player width is 52 pixels)
-        if (newX > SCREEN_WIDTH - 52) newX = SCREEN_WIDTH - 52;
+        if (newX > SCREEN_WIDTH - 26) newX = SCREEN_WIDTH - 26;
         gameData->player.position.x = newX;
     }
 
     gameData->alienMoveTimer += (float)deltaTime;
     if (gameData->alienMoveTimer >= gameData->alienMoveInterval) {
         gameData->alienMoveTimer = 0;
-        SDL_bool shouldFlip = SDL_FALSE;
+        SDL_bool bShouldFlip = SDL_FALSE;
+        gameData->bAlive = SDL_FALSE;
 
         // Check if ANY alien will hit the edge in the CURRENT direction
         for (int i = 0; i < NUM_ENEMIES-1; i++) {
             if (!gameData->enemies[i].bAlive) continue;
 
+            gameData->bAlive = SDL_TRUE;
+
             int nextX = gameData->enemies[i].position.x + (gameData->alienDirection * 15);
             if (gameData->alienDirection == 1 && nextX >= SCREEN_WIDTH - 24) {
-                shouldFlip = SDL_TRUE;
+                bShouldFlip = SDL_TRUE;
                 break;
             }
             if (gameData->alienDirection == -1 && nextX <= 0) {
-                shouldFlip = SDL_TRUE;
+                bShouldFlip = SDL_TRUE;
                 break;
             }
         }
 
-        if (shouldFlip) {
+        if (bShouldFlip) {
             gameData->alienDirection *= -1; // Reverse
             for (int i = 0; i < NUM_ENEMIES-1; i++) {
                 gameData->enemies[i].position.y += 16; // Move down
@@ -186,13 +193,21 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         }
     }
 
+    // All aliens are dead
+    if (!gameData->bAlive)
+    {
+        gameData->bAlive = SDL_TRUE;
+        SpawnEnemies(gameData);
+        gameData->player.lives++;
+    }
+
     gameData->alienFireTimer += (float)deltaTime;
     if (gameData->alienFireTimer >= gameData->alienFireInterval)
     {
         gameData->alienFireTimer = 0;
         int aliveCount = 0;
-        int indices[NUM_ENEMIES];
-        for(int i=0; i<NUM_ENEMIES; i++) if(gameData->enemies[i].bAlive) indices[aliveCount++] = i;
+        int indices[NUM_ENEMIES-1];
+        for(int i=0; i<NUM_ENEMIES-1; i++) if(gameData->enemies[i].bAlive) indices[aliveCount++] = i;
 
         if (aliveCount > 0 && gameData->numActiveEnemyProjectiles < MAX_PROJECTILES)
         {
@@ -200,6 +215,7 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
             InitProjectile(&gameData->enemyProjectiles[gameData->numActiveEnemyProjectiles++], (SDL_Point){enemy->position.x + 8, enemy->position.y + 20}, EnemyProjectile);
         }
     }
+
     if (gameData->bPlayerProjectileActive)
     {
         UpdateProjectile(&gameData->playerProjectile, deltaTime);
@@ -228,21 +244,20 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         if (gameData->playerProjectile.y < 0) gameData->bPlayerProjectileActive = SDL_FALSE;
     }
 
-    // --- 3. Update Enemy Projectile Pool ---
     for (int i = 0; i < gameData->numActiveEnemyProjectiles; i++)
     {
         Projectile *p = &gameData->enemyProjectiles[i];
         UpdateProjectile(p, deltaTime);
 
-        SDL_bool hit = SDL_FALSE;
+        SDL_bool bHit = SDL_FALSE;
         // Check Player Collision
         if (CHECK_COLLISION(p->x, p->y, 16, 24, gameData->player.position.x, gameData->player.position.y, 26, 24))
         {
             gameData->player.lives--;
-            hit = SDL_TRUE;
+            bHit = SDL_TRUE;
         }
 
-        if (hit || p->y > SCREEN_HEIGHT + 30)
+        if (bHit || p->y > SCREEN_HEIGHT + 30)
         {
             gameData->enemyProjectiles[i] = gameData->enemyProjectiles[gameData->numActiveEnemyProjectiles - 1];
             gameData->numActiveEnemyProjectiles--;

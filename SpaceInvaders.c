@@ -2,6 +2,8 @@
 
 #include "SpaceInvaders.h"
 
+#include <time.h>
+
 #include "Helpers.h"
 
 void Init(GameState *state)
@@ -33,6 +35,8 @@ void Init(GameState *state)
         exit(1);
     }
 
+    srand((unsigned int)time(NULL));
+
     state->bShouldClose = SDL_FALSE;
 }
 
@@ -63,10 +67,15 @@ void InitGameData(GameData *data)
         }
     }
 
+    data->bPlayerProjectileActive = SDL_FALSE;
+
     data->alienDirection = 1;
     data->alienMoveTimer = 0.0f;
     data->alienMoveInterval = 0.5f;
-    data->numActiveProjectiles = 0;
+    data->numActiveEnemyProjectiles = 0;
+
+    data->alienFireTimer = 0.0f;
+    data->alienFireInterval = 1.5f;
 
     InitPlayer(&data->player);
 }
@@ -104,7 +113,10 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
             case SDL_KEYDOWN: switch (event.key.keysym.sym)
             {
                 case SDLK_ESCAPE: state->bShouldClose = SDL_TRUE; break;
-                case SDLK_SPACE: Fire(&gameData->player); break;
+                case SDLK_SPACE: if (gameData->bPlayerProjectileActive == SDL_FALSE){
+                    gameData->bPlayerProjectileActive = SDL_TRUE;
+                    InitProjectile(&gameData->playerProjectile, (SDL_Point){gameData->player.position.x+12, gameData->player.position.y+10}, PlayerProjectile);
+                }; break;
                 default: break;
             }
             default: break;
@@ -162,25 +174,59 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         }
     }
 
-    for (int i = 0; i < gameData->numActiveProjectiles; i++) {
-        Projectile *p = &gameData->projectiles[i];
-        UpdateProjectile(p, deltaTime);
+    gameData->alienFireTimer += (float)deltaTime;
+    if (gameData->alienFireTimer >= gameData->alienFireInterval)
+    {
+        gameData->alienFireTimer = 0;
+        int aliveCount = 0;
+        int indices[NUM_ENEMIES];
+        for(int i=0; i<NUM_ENEMIES; i++) if(gameData->enemies[i].bAlive) indices[aliveCount++] = i;
 
-        // Collision: Player Projectile vs Enemy
-        if (p->type == PlayerProjectile) {
-            for (int j = 0; j < NUM_ENEMIES-1; j++) {
-                Enemy *e = &gameData->enemies[j];
-                if (e->bAlive && CHECK_COLLISION(p->x, p->y, 16, 24, e->position.x, e->position.y, 24, 24)) {
-                    e->bAlive = SDL_FALSE;
-                    p->y = -100; // Mark for deletion
-                }
+        if (aliveCount > 0 && gameData->numActiveEnemyProjectiles < MAX_PROJECTILES)
+        {
+            Enemy *enemy = &gameData->enemies[indices[rand() % aliveCount]];
+            InitProjectile(&gameData->enemyProjectiles[gameData->numActiveEnemyProjectiles++], (SDL_Point){enemy->position.x + 8, enemy->position.y + 20}, EnemyProjectile);
+        }
+    }
+    if (gameData->bPlayerProjectileActive)
+    {
+        UpdateProjectile(&gameData->playerProjectile, deltaTime);
+
+        // Check Alien Collisions
+        for (int i = 0; i < NUM_ENEMIES; i++)
+        {
+            Enemy *e = &gameData->enemies[i];
+            if (e->bAlive && CHECK_COLLISION(gameData->playerProjectile.x, gameData->playerProjectile.y, 16, 24, e->position.x, e->position.y, 24, 24))
+            {
+                e->bAlive = SDL_FALSE;
+                gameData->bPlayerProjectileActive = SDL_FALSE;
+                gameData->alienMoveInterval -= 0.005f;
+                break;
             }
         }
 
-        // Clean up off-screen or spent projectiles
-        if (p->y < 0 || p->y > SCREEN_HEIGHT) {
-            gameData->projectiles[i] = gameData->projectiles[gameData->numActiveProjectiles - 1];
-            gameData->numActiveProjectiles--;
+        // Out of Bounds check
+        if (gameData->playerProjectile.y < 0) gameData->bPlayerProjectileActive = SDL_FALSE;
+    }
+
+    // --- 3. Update Enemy Projectile Pool ---
+    for (int i = 0; i < gameData->numActiveEnemyProjectiles; i++)
+    {
+        Projectile *p = &gameData->enemyProjectiles[i];
+        UpdateProjectile(p, deltaTime);
+
+        SDL_bool hit = SDL_FALSE;
+        // Check Player Collision
+        if (CHECK_COLLISION(p->x, p->y, 16, 24, gameData->player.position.x, gameData->player.position.y, 26, 24))
+        {
+            gameData->player.lives--;
+            hit = SDL_TRUE;
+        }
+
+        if (hit || p->y > SCREEN_HEIGHT + 30)
+        {
+            gameData->enemyProjectiles[i] = gameData->enemyProjectiles[gameData->numActiveEnemyProjectiles - 1];
+            gameData->numActiveEnemyProjectiles--;
             i--;
         }
     }
@@ -193,10 +239,13 @@ void Render(GameState *state, GameTextures *textures, GameData *gameData)
         RenderEnemy(&gameData->enemies[i], &textures->enemies, state->renderer);
     }
 
-    for (int i = 0; i < gameData->numActiveProjectiles; i++)
+    for (int i = 0; i < gameData->numActiveEnemyProjectiles; i++)
     {
-        RenderProjectile(&gameData->projectiles[i], &textures->projectiles, state->renderer);
+        RenderProjectile(&gameData->enemyProjectiles[i], &textures->projectiles, state->renderer);
     }
+
+    if (gameData->bPlayerProjectileActive)
+        RenderProjectile(&gameData->playerProjectile, &textures->projectiles, state->renderer);
 
     RenderPlayer(&gameData->player, &textures->player, state->renderer);
 }

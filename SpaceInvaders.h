@@ -25,12 +25,18 @@ typedef struct {
     Player player;
     Enemy enemies[NUM_ENEMIES];
 
-    Projectile projectiles[MAX_PROJECTILES];
-    int numActiveProjectiles;
+    Projectile playerProjectile;
+    SDL_bool bPlayerProjectileActive;
+
+    Projectile enemyProjectiles[MAX_PROJECTILES];
+    int numActiveEnemyProjectiles;
 
     int alienDirection; // 1 for right, -1 for left
     float alienMoveTimer;
     float alienMoveInterval;
+
+    float alienFireTimer;
+    float alienFireInterval;
 } GameData;
 
 typedef struct {

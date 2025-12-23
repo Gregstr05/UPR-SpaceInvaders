@@ -28,6 +28,4 @@ void DestroyPlayerTextures(PlayerTextures *textures);
 
 void RenderPlayer(Player *player, PlayerTextures *textures, SDL_Renderer *renderer);
 
-void Fire(Player *player);
-
 #endif //SPACEINVADERS_PLAYER_H

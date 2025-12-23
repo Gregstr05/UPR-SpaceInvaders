@@ -35,6 +35,12 @@ void Init(GameState *state)
         exit(1);
     }
 
+    if (TTF_Init() == -1)
+    {
+        printf("SDL_ttf could not initialize! TTF_Error: %s\n", TTF_GetError());
+        exit(1);
+    }
+
     srand((unsigned int)time(NULL));
 
     state->bShouldClose = SDL_FALSE;
@@ -78,6 +84,8 @@ void InitGameData(GameData *data)
     data->alienFireInterval = 1.5f;
 
     InitPlayer(&data->player);
+    data->score = 0;
+    data->shots = 0;
 }
 
 void LoadTextures(SDL_Renderer *renderer, GameTextures *textures)
@@ -85,6 +93,7 @@ void LoadTextures(SDL_Renderer *renderer, GameTextures *textures)
     LoadEnemyTextures(renderer, &textures->enemies);
     LoadPlayerTextures(renderer, &textures->player);
     LoadProjectileTextures(renderer, &textures->projectiles);
+    textures->font = TTF_OpenFont("Fonts/PressStart2P-Regular.ttf", 24);
 }
 
 void DestroyTextures(GameTextures *textures)
@@ -92,12 +101,14 @@ void DestroyTextures(GameTextures *textures)
     DestroyEnemyTextures(&textures->enemies);
     DestroyPlayerTextures(&textures->player);
     DestroyProjectileTextures(&textures->projectiles);
+    TTF_CloseFont(textures->font);
 }
 
 void Destroy(GameState *state)
 {
     SDL_DestroyRenderer(state->renderer);
     SDL_DestroyWindow(state->window);
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -116,6 +127,7 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
                 case SDLK_SPACE: if (gameData->bPlayerProjectileActive == SDL_FALSE){
                     gameData->bPlayerProjectileActive = SDL_TRUE;
                     InitProjectile(&gameData->playerProjectile, (SDL_Point){gameData->player.position.x+12, gameData->player.position.y+10}, PlayerProjectile);
+                    gameData->shots++;
                 }; break;
                 default: break;
             }
@@ -201,6 +213,13 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
                 e->bAlive = SDL_FALSE;
                 gameData->bPlayerProjectileActive = SDL_FALSE;
                 gameData->alienMoveInterval -= 0.005f;
+                switch (e->type)
+                {
+                    case Small: gameData->score += 30; break;
+                    case Medium: gameData->score += 20; break;
+                    case Large: gameData->score += 10; break;
+                    case MotherShip: gameData->score += GET_MOTHERSHIP_VALUE(gameData->shots); break;
+                }
                 break;
             }
         }
@@ -248,4 +267,6 @@ void Render(GameState *state, GameTextures *textures, GameData *gameData)
         RenderProjectile(&gameData->playerProjectile, &textures->projectiles, state->renderer);
 
     RenderPlayer(&gameData->player, &textures->player, state->renderer);
+
+    RenderUI(state->renderer, gameData, textures);
 }

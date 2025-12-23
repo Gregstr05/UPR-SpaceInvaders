@@ -10,7 +10,7 @@
 
 void InitPlayer(Player *player)
 {
-    player->position = (SDL_Point){200, 550};
+    player->position = (SDL_Point){200, 520};
     player->lives = 3;
 }
 

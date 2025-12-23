@@ -32,4 +32,7 @@ typedef struct {
 #define CHECK_COLLISION(x1, y1, w1, h1, x2, y2, w2, h2) \
     SDL_HasIntersection(&(SDL_Rect){x1, y1, w1, h1}, &(SDL_Rect){x2, y2, w2, h2})
 
+static int motherShipPoints[] = {100, 50, 50, 100, 150, 100, 100, 50, 300, 100, 100, 100, 50, 150, 100, 50};
+#define GET_MOTHERSHIP_VALUE(shot) motherShipPoints[shot%15]
+
 #endif //SPACEINVADERS_HELPERS_H

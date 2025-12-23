@@ -4,6 +4,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "Enemy.h"
 #include "Player.h"
@@ -23,6 +24,9 @@ typedef struct {
 
 typedef struct {
     Player player;
+    int score;
+    int shots;
+
     Enemy enemies[NUM_ENEMIES];
 
     Projectile playerProjectile;
@@ -43,6 +47,7 @@ typedef struct {
     EnemyTextures enemies;
     PlayerTextures player;
     ProjectileTextures projectiles;
+    TTF_Font *font;
 } GameTextures;
 
 /**
@@ -74,5 +79,7 @@ void Update(double deltaTime, GameState *state, GameData *gameData);
  * @param state GameState reference
  */
 void Render(GameState *state, GameTextures *textures, GameData *gameData);
+
+void RenderUI(SDL_Renderer *renderer, GameData *data, GameTextures *textures);
 
 #endif //SPACEINVADERS_SPACEINVADERS_H

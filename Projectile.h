@@ -6,6 +6,8 @@
 #define SPACEINVADERS_PROJECTILE_H
 #include <SDL2/SDL_render.h>
 
+#define MAX_PROJECTILES 32
+
 typedef enum {
     PlayerProjectile,
     EnemyProjectile
@@ -25,7 +27,9 @@ typedef struct {
 int LoadProjectileTextures(SDL_Renderer *renderer, ProjectileTextures *projectileTextures);
 void DestroyProjectileTextures(ProjectileTextures *projectileTextures);
 
-void InitProjectile(Projectile *projectile, SDL_Point position);
+void InitProjectile(Projectile *projectile, SDL_Point position, ProjectileType type);
+
+void UpdateProjectile(Projectile *projectile, double deltaTime);
 
 void RenderProjectile(Projectile *projectile, ProjectileTextures *textures, SDL_Renderer *renderer);
 

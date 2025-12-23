@@ -18,12 +18,20 @@ void DestroyProjectileTextures(ProjectileTextures *projectileTextures)
     SDL_DestroyTexture(projectileTextures->player);
 }
 
-void InitProjectile(Projectile *projectile, SDL_Point position)
+void InitProjectile(Projectile *projectile, SDL_Point position, ProjectileType type)
 {
     projectile->x = position.x;
     projectile->y = position.y;
-    projectile->type = EnemyProjectile;
-    projectile->velocity = 8;
+    projectile->type = type;
+    projectile->velocity = (type == EnemyProjectile)?4:-4;
+}
+
+void UpdateProjectile(Projectile *projectile, double deltaTime) {
+    if (projectile->type == PlayerProjectile) {
+        projectile->y -= (int)(projectile->velocity * deltaTime);
+    } else {
+        projectile->y += (int)(projectile->velocity * deltaTime);
+    }
 }
 
 void RenderProjectile(Projectile *projectile, ProjectileTextures *textures, SDL_Renderer *renderer)

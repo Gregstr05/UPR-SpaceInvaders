@@ -2,6 +2,8 @@
 
 #include "SpaceInvaders.h"
 
+#include "Helpers.h"
+
 void Init(GameState *state)
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -60,6 +62,11 @@ void InitGameData(GameData *data)
             currentEnemyIndex++;
         }
     }
+
+    data->alienDirection = 1;
+    data->alienMoveTimer = 0.0f;
+    data->alienMoveInterval = 0.5f;
+    data->numActiveProjectiles = 0;
 
     InitPlayer(&data->player);
 }
@@ -123,6 +130,60 @@ void Update(double deltaTime, GameState *state, GameData *gameData)
         gameData->player.position.x = newX;
     }
 
+    gameData->alienMoveTimer += (float)deltaTime;
+    if (gameData->alienMoveTimer >= gameData->alienMoveInterval) {
+        gameData->alienMoveTimer = 0;
+        SDL_bool shouldFlip = SDL_FALSE;
+
+        // Check if ANY alien will hit the edge in the CURRENT direction
+        for (int i = 0; i < NUM_ENEMIES-1; i++) {
+            if (!gameData->enemies[i].bAlive) continue;
+
+            int nextX = gameData->enemies[i].position.x + (gameData->alienDirection * 15);
+            if (gameData->alienDirection == 1 && nextX >= SCREEN_WIDTH - 24) {
+                shouldFlip = SDL_TRUE;
+                break;
+            }
+            if (gameData->alienDirection == -1 && nextX <= 0) {
+                shouldFlip = SDL_TRUE;
+                break;
+            }
+        }
+
+        if (shouldFlip) {
+            gameData->alienDirection *= -1; // Reverse
+            for (int i = 0; i < NUM_ENEMIES-1; i++) {
+                gameData->enemies[i].position.y += 16; // Move down
+            }
+        } else {
+            for (int i = 0; i < NUM_ENEMIES-1; i++) {
+                gameData->enemies[i].position.x += (gameData->alienDirection * 15);
+            }
+        }
+    }
+
+    for (int i = 0; i < gameData->numActiveProjectiles; i++) {
+        Projectile *p = &gameData->projectiles[i];
+        UpdateProjectile(p, deltaTime);
+
+        // Collision: Player Projectile vs Enemy
+        if (p->type == PlayerProjectile) {
+            for (int j = 0; j < NUM_ENEMIES-1; j++) {
+                Enemy *e = &gameData->enemies[j];
+                if (e->bAlive && CHECK_COLLISION(p->x, p->y, 16, 24, e->position.x, e->position.y, 24, 24)) {
+                    e->bAlive = SDL_FALSE;
+                    p->y = -100; // Mark for deletion
+                }
+            }
+        }
+
+        // Clean up off-screen or spent projectiles
+        if (p->y < 0 || p->y > SCREEN_HEIGHT) {
+            gameData->projectiles[i] = gameData->projectiles[gameData->numActiveProjectiles - 1];
+            gameData->numActiveProjectiles--;
+            i--;
+        }
+    }
 }
 
 void Render(GameState *state, GameTextures *textures, GameData *gameData)
@@ -130,6 +191,11 @@ void Render(GameState *state, GameTextures *textures, GameData *gameData)
     for (int i = 0; i < NUM_ENEMIES; i++)
     {
         RenderEnemy(&gameData->enemies[i], &textures->enemies, state->renderer);
+    }
+
+    for (int i = 0; i < gameData->numActiveProjectiles; i++)
+    {
+        RenderProjectile(&gameData->projectiles[i], &textures->projectiles, state->renderer);
     }
 
     RenderPlayer(&gameData->player, &textures->player, state->renderer);

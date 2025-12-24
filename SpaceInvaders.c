@@ -81,6 +81,12 @@ void InitGameData(GameData *data)
 
     SpawnEnemies(data);
 
+    for (int i = 0; i < 4; i++)
+    {
+        SDL_Point position = {SCREEN_WIDTH/5*(i+1)-40, 450};
+        InitBunker(&data->bunkers[i], position);
+    }
+
     // Mothership starts dead
     data->enemies[NUM_ENEMIES - 1].type = MotherShip;
     data->enemies[NUM_ENEMIES - 1].bAlive = SDL_FALSE;
@@ -112,6 +118,7 @@ void LoadTextures(SDL_Renderer *renderer, GameTextures *textures)
     LoadEnemyTextures(renderer, &textures->enemies);
     LoadPlayerTextures(renderer, &textures->player);
     LoadProjectileTextures(renderer, &textures->projectiles);
+    LoadBunkerTextures(renderer, &textures->bunkers);
     textures->font = TTF_OpenFont("Fonts/PressStart2P-Regular.ttf", 24);
 }
 
@@ -120,6 +127,7 @@ void DestroyTextures(GameTextures *textures)
     DestroyEnemyTextures(&textures->enemies);
     DestroyPlayerTextures(&textures->player);
     DestroyProjectileTextures(&textures->projectiles);
+    DestroyBunkerTextures(&textures->bunkers);
     TTF_CloseFont(textures->font);
 }
 
@@ -343,30 +351,54 @@ void UpdateGamePlay(double deltaTime, GameData *gameData)
     {
         UpdateProjectile(&gameData->playerProjectile, deltaTime);
 
-        // Check Alien Collisions
-        for (int i = 0; i < NUM_ENEMIES; i++)
+        // Check bunker collisions
+        SDL_bool bHit = SDL_FALSE;
+        for (int i = 0; i < 4; i++)
         {
-            Enemy *e = &gameData->enemies[i];
-            int hitW = (e->type == MotherShip) ? 32 : 24;
-            int hitH = (e->type == MotherShip) ? 14 : 24;
-            if (e->bAlive && CHECK_COLLISION(gameData->playerProjectile.x, gameData->playerProjectile.y, /*It feels better to have a larger projectile hitbox for player projectiles*/ 8, 16, e->position.x, e->position.y, hitH, hitH))
+            if (gameData->playerProjectile.y > 500 || gameData->playerProjectile.y < 430) break;
+
+            for (int p = 0; p < 10; p++)
             {
-                e->bAlive = SDL_FALSE;
-                gameData->bPlayerProjectileActive = SDL_FALSE;
-                gameData->alienMoveInterval -= 0.005f;
-                switch (e->type)
+                BunkerPart *part = &gameData->bunkers[i].parts[p];
+                if (part->health > 0 && CHECK_COLLISION(gameData->playerProjectile.x, gameData->playerProjectile.y, 8, 16,
+                                                        part->position.x, part->position.y, 20, 20))
                 {
-                    case Small: gameData->score += 30; break;
-                    case Medium: gameData->score += 20; break;
-                    case Large: gameData->score += 10; break;
-                    case MotherShip: gameData->score += GET_MOTHERSHIP_VALUE(gameData->shots); break;
+                    part->health--;
+                    gameData->bPlayerProjectileActive = SDL_FALSE;
+                    bHit = SDL_TRUE;
+                    break;
                 }
-                break;
             }
+            if (bHit) break;
         }
 
-        // Out of Bounds check
-        if (gameData->playerProjectile.y < 0) gameData->bPlayerProjectileActive = SDL_FALSE;
+        if (!bHit)
+        {
+            // Check Alien Collisions
+            for (int i = 0; i < NUM_ENEMIES; i++)
+            {
+                Enemy *e = &gameData->enemies[i];
+                int hitW = (e->type == MotherShip) ? 32 : 24;
+                int hitH = (e->type == MotherShip) ? 14 : 24;
+                if (e->bAlive && CHECK_COLLISION(gameData->playerProjectile.x, gameData->playerProjectile.y, /*It feels better to have a larger projectile hitbox for player projectiles*/ 8, 16, e->position.x, e->position.y, hitW, hitH))
+                {
+                    e->bAlive = SDL_FALSE;
+                    gameData->bPlayerProjectileActive = SDL_FALSE;
+                    gameData->alienMoveInterval -= 0.005f;
+                    switch (e->type)
+                    {
+                        case Small: gameData->score += 30; break;
+                        case Medium: gameData->score += 20; break;
+                        case Large: gameData->score += 10; break;
+                        case MotherShip: gameData->score += GetMotherShipValue(gameData->shots); break;
+                    }
+                    break;
+                }
+            }
+
+            // Out of Bounds check
+            if (gameData->playerProjectile.y < 0) gameData->bPlayerProjectileActive = SDL_FALSE;
+        }
     }
 
     for (int i = 0; i < gameData->numActiveEnemyProjectiles; i++)
@@ -374,7 +406,28 @@ void UpdateGamePlay(double deltaTime, GameData *gameData)
         Projectile *p = &gameData->enemyProjectiles[i];
         UpdateProjectile(p, deltaTime);
 
+        if (p->y < 400) continue;
+
         SDL_bool bHit = SDL_FALSE;
+
+        // Check bunker collisions
+        for (int b = 0; b < 4; b++)
+        {
+            if (p->y < 430 || p->y > 490) continue;
+
+            for (int partIdx = 0; partIdx < 10; partIdx++)
+            {
+                BunkerPart *part = &gameData->bunkers[b].parts[partIdx];
+                if (part->health > 0 && CHECK_COLLISION(p->x, p->y, 16, 24, part->position.x, part->position.y, 20, 20))
+                {
+                    part->health--;
+                    bHit = SDL_TRUE;
+                    break;
+                }
+            }
+            if (bHit) break;
+        }
+
         // Check Player Collision
         if (CHECK_COLLISION(p->x, p->y, 16, 24, gameData->player.position.x, gameData->player.position.y, 26, 24))
         {
@@ -425,6 +478,11 @@ void Render(GameState *state, GameTextures *textures, GameData *gameData)
 
         if (gameData->bPlayerProjectileActive)
             RenderProjectile(&gameData->playerProjectile, &textures->projectiles, state->renderer);
+
+        for (int i = 0; i < 4; i++)
+        {
+            RenderBunker(&gameData->bunkers[i], &textures->bunkers, state->renderer);
+        }
 
         RenderPlayer(&gameData->player, &textures->player, state->renderer);
     }

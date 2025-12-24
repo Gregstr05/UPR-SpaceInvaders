@@ -52,3 +52,9 @@ void RenderEnemy(Enemy *enemy, EnemyTextures *textures, SDL_Renderer *renderer)
         default: break;
     }
 }
+
+int GetMotherShipValue(int shots)
+{
+    static int motherShipPoints[] = {100, 50, 50, 100, 150, 100, 100, 50, 300, 100, 100, 100, 50, 150, 100, 50};
+    return motherShipPoints[shots%15];
+}

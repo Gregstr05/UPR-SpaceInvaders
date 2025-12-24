@@ -10,6 +10,7 @@ target_sources(${PROJECT_NAME}
 		Player.h
 		Projectile.h
 		UserInterface.h
+		Bunker.h
 		Helpers.h
 	PRIVATE
 		main.c
@@ -18,6 +19,7 @@ target_sources(${PROJECT_NAME}
 		Player.c
 		Projectile.c
 		UserInterface.c
+		Bunker.c
 )
 
 find_package(SDL2 REQUIRED)

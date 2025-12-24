@@ -6,6 +6,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "Bunker.h"
 #include "Enemy.h"
 #include "Player.h"
 #include "Projectile.h"
@@ -52,6 +53,8 @@ typedef struct {
     Enemy enemies[NUM_ENEMIES];
     SDL_bool bAlive;
 
+    Bunker bunkers[4];
+
     Projectile playerProjectile;
     SDL_bool bPlayerProjectileActive;
 
@@ -74,6 +77,7 @@ typedef struct {
     EnemyTextures enemies;
     PlayerTextures player;
     ProjectileTextures projectiles;
+    BunkerTextures bunkers;
     TTF_Font *font;
 } GameTextures;
 

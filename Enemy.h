@@ -34,4 +34,6 @@ void InitEnemy(Enemy *enemy, EnemyType type, int posX, int posY);
 
 void RenderEnemy(Enemy *enemy, EnemyTextures *textures, SDL_Renderer *renderer);
 
+int GetMotherShipValue(int shots);
+
 #endif //SPACEINVADERS_ENEMY_H

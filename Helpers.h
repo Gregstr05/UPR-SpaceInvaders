@@ -32,7 +32,16 @@ typedef struct {
 #define CHECK_COLLISION(x1, y1, w1, h1, x2, y2, w2, h2) \
     SDL_HasIntersection(&(SDL_Rect){x1, y1, w1, h1}, &(SDL_Rect){x2, y2, w2, h2})
 
-static int motherShipPoints[] = {100, 50, 50, 100, 150, 100, 100, 50, 300, 100, 100, 100, 50, 150, 100, 50};
-#define GET_MOTHERSHIP_VALUE(shot) motherShipPoints[shot%15]
+#define ANIMATED_TEXTURES(name, frames) SDL_Texture *name[frames];
+
+#define LOAD_ANIMATED_TEXTURES(location, path, frames, ext, renderer) do{ \
+        for (int i = 0; i < frames; i++) \
+        {char buffer[100]; sprintf(buffer, "%s%d.%s", path, i, ext); location[i] = IMG_LoadTexture(renderer, buffer); SDL_SetTextureScaleMode(location[i], SDL_ScaleModeNearest);} \
+    }while(0);
+
+#define DESTROY_ANIMATED_TEXTURES(location, frames) do{ \
+    for (int i = 0; i < frames; i++) \
+    SDL_DestroyTexture(location[i]); \
+    }while(0);
 
 #endif //SPACEINVADERS_HELPERS_H

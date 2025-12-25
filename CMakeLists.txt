@@ -34,8 +34,10 @@ target_link_libraries(
 		SDL2_ttf
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
-target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+if (NOT WIN32)
+	target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+	target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+endif()
 
 file(GLOB FONTS *.ttf)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Fonts)
@@ -52,3 +54,7 @@ add_custom_command(
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${IMAGES} ${CMAKE_BINARY_DIR}/Textures
 )
+
+if(WIN32)
+	set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()

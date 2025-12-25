@@ -4,6 +4,23 @@ Simple space invaders clone using C and SDL2 for Introduction to programming cou
 > [!NOTE]
 > Build with `cmake . -B build` and `cmake --build build`
 
+## Gameplay
+Player controls a tower that can move left and right and shoot projectiles to destroy aliens.  
+Player is provided additional cover from alien projectiles in the form bunkers, but the player needs to be careful where they shoot, because bunkers can be destroyed by both alien and player projectiles.  
+For every alien the player destroys they get certain amount of points added to their score
+
+| Alien                         | Points |
+|-------------------------------|--------|
+| ![Large](Large.png)           | 10     |
+| ![Medium](Medium.png)         | 20     |
+| ![Small](Small.png)           | 30     |
+| ![Mothership](MotherShip.png) | 50-300 |
+
+Aliens move in a swarm from one end of the screen to the other and upon reaching one of the edges they move a bit lower.  
+When the player manages to destroy the whole swarm they gain 1 more *life*.  
+The aliens randomly shoot projectiles, which when it hits player's tower damages it and decreases the amount of player's *lives*. When the player reaches 0 *lives* the game ends and their score is saved, they have the option to enter their nickname (6 characters), to be shown on the leaderboard in the main menu.
+
+---
 ## Update Loop
 The update loop uses delta time (difference between the previous frame's timestamp and current frame's timestamp) which is used to offset the effects of different frame times.
 Without delta time any movement would be dependent on the frame time itself, meaning with shorter frame times (higher frames per second) things would happen quicker, because the update loop would run many more times, than with longer frame times (lower frames per second).

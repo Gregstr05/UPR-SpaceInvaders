@@ -21,6 +21,106 @@ When the player manages to destroy the whole swarm they gain 1 more *life*.
 The aliens randomly shoot projectiles, which when it hits player's tower damages it and decreases the amount of player's *lives*. When the player reaches 0 *lives* the game ends and their score is saved, they have the option to enter their nickname (6 characters), to be shown on the leaderboard in the main menu.
 
 ---
+## Architecture
+The application relevant data is stored in `GameState` struct, which stores the window reference, renderer reference and a boolean that decides if the game window should close and the application should end.  
+```c++
+typedef struct {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_bool bShouldClose;
+} GameState;
+```
+
+The game gets initialized in the `main()` function of the application by first initializing the application's `GameState`, which also creates the SDL window and renderer. Then loads all the textures and finally initializes the `GameData` with the default values. 
+
+Every game frame is handled with the main loop which first calls the `Update()` function, then clears the screen and calls the `Render()` function before presenting to the screen.
+The loop will run until the `bShouldClose` field in the `GameState` struct isn't set to `TRUE`
+```c++
+int main()
+{
+	GameState gameState;
+	Init(&gameState);
+
+	GameTextures textures;
+	LoadTextures(gameState.renderer, &textures);
+
+	GameData gameData;
+	InitGameData(&gameData);
+
+	unsigned long lastTime = SDL_GetPerformanceCounter();
+	unsigned long currentTime = 0;
+
+	while (!gameState.bShouldClose) {
+		currentTime = SDL_GetPerformanceCounter();;
+		double deltaTime = (double)(currentTime - lastTime) / (double)SDL_GetPerformanceFrequency();
+		lastTime = currentTime;
+
+		Update(deltaTime, &gameState, &gameData);
+
+		SDL_SetRenderDrawColor(gameState.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderClear(gameState.renderer);
+
+		Render(&gameState, &textures, &gameData);
+
+		SDL_RenderPresent(gameState.renderer);
+	}
+
+	DestroyTextures(&textures);
+	Destroy(&gameState);
+
+	return 0;
+}
+```
+
+Different game phases (main menu, game and game over) are handled with a simple state machine switching between the states/phases defined in the `GamePhase` enum
+```c++
+typedef enum {
+    PHASE_MENU,
+    PHASE_PLAYING,
+    PHASE_GAME_OVER
+} GamePhase;
+```
+
+`GameData` stores all the data relevant to the game, like player health, the score, game phase and also all the enemy data.
+```c++
+typedef struct {
+    Player player;
+    int score;
+    int shots;
+
+    char playerName[7];
+    int nameCharIndex;
+
+    HighScore highScores[5];
+    int numHighScores;
+
+    GamePhase phase;
+
+    Enemy enemies[NUM_ENEMIES];
+    SDL_bool bAlive;
+
+    Bunker bunkers[4];
+
+    Projectile playerProjectile;
+    SDL_bool bPlayerProjectileActive;
+
+    Projectile enemyProjectiles[MAX_PROJECTILES];
+    int numActiveEnemyProjectiles;
+
+    int alienDirection; // 1 for right, -1 for left
+    float alienMoveTimer;
+    float alienMoveInterval;
+
+    float alienFireTimer;
+    float alienFireInterval;
+
+    float motherShipSpawnTimer;
+    float motherShipSpawnInterval;
+    int motherShipDirection;
+} GameData;
+```
+
+
 ## Update Loop
 The update loop uses delta time (difference between the previous frame's timestamp and current frame's timestamp) which is used to offset the effects of different frame times.
 Without delta time any movement would be dependent on the frame time itself, meaning with shorter frame times (higher frames per second) things would happen quicker, because the update loop would run many more times, than with longer frame times (lower frames per second).
@@ -115,3 +215,41 @@ if (gameData->alienMoveTimer >= gameData->alienMoveInterval) {
 ```
 I loop through the enemy array purposely skipping the last element, because that one is reserved for the mother ship/UFO that moves independently of the swarm.
 
+---
+## Bunkers
+Bunkers are implemented as an array of individual bunker parts, the bunker's position.
+```c++
+typedef struct {
+    //  /##\ - 4
+    //  #/\# - 4
+    //  #  # - 2
+    // 4+4+2=10
+    BunkerPart parts[10];
+    SDL_Point position;
+    SDL_bool bAlive;
+} Bunker;
+```
+
+Each bunker part also has position (for collision checks), health, part type from `BunkerType` enum and a boolean field if ts's texture should be flipped as a right side part, because the bunkers are symmetrical.
+```c++
+typedef enum {
+    OuterCorner,
+    InnerCorner,
+    Block
+} BunkerType;
+
+typedef struct {
+    BunkerType type;
+    SDL_Point position;
+    int health;
+    SDL_bool bIsRight;
+} BunkerPart;
+```
+
+| BunkerType  | Texture                               |
+|-------------|---------------------------------------|
+| OuterCorner | ![OuterCorner3.png](OuterCorner3.png) |
+| InnerCorner | ![InnerCorner2.png](InnerCorner2.png) |
+| Block       | ![Block3.png](Block3.png)             |
+
+Each of the textures has multiple versions depending on their health/damage.
